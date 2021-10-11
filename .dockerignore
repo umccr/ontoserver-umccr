@@ -1,0 +1,8 @@
+# Ignore everything
+*
+
+# explicitly only include what we want
+!docker-root-content/**
+!docker-script-content/**
+!docker-to-load-content/**
+!tools/**
