@@ -3,8 +3,8 @@ FROM python:3.8 AS pierianbuilder
 COPY tools/pieriandx/* /app/
 WORKDIR /app
 RUN pip install -r requirements.txt
-RUN wget https://tools.pieriandx.com/confluence/download/attachments/37980477/SNOMED_CT%20Disease_trees.xlsx?version=1&modificationDate=1561395438000&api=v2
-RUN wget https://tools.pieriandx.com/confluence/download/attachments/37980477/SnomedCT-Term_For_SpecimenType.xls?version=1&modificationDate=1561395451000&api=v2
+RUN wget "https://tools.pieriandx.com/confluence/download/attachments/37980477/SNOMED_CT%20Disease_trees.xlsx?version=1&modificationDate=1561395438000&api=v2" -O disease.xlsx
+RUN wget "https://tools.pieriandx.com/confluence/download/attachments/37980477/SnomedCT-Term_For_SpecimenType.xls?version=1&modificationDate=1561395451000&api=v2" -O specimen.xls
 RUN python main.py
 
 FROM openjdk:18 AS owlbuilder

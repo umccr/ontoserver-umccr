@@ -23,7 +23,7 @@ def generate_xlsx_value_set(vsb: ValueSetBuilder, ws: Any, filename: str):
 
 
 def generate_diseases_value_sets():
-    workbook = load_workbook("SNOMED_CT Disease_trees.xlsx")
+    workbook = load_workbook("disease.xlsx")
 
     # sheet 1 is the diseases
     generate_xlsx_value_set(
@@ -63,7 +63,7 @@ def generate_diseases_value_sets():
 
 
 def generate_specimen_type_value_set():
-    workbook = xlrd.open_workbook("SnomedCT-Term_For_SpecimenType.xls")
+    workbook = xlrd.open_workbook("specimen.xls")
 
     vsb = ValueSetBuilder(
         "pieriandx-specimen-type",

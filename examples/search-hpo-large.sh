@@ -1,5 +1,5 @@
-curl --location --request POST 'http://localhost:8080/fhir/ValueSet/$expand' \
---header 'Content-Type: application/json' \
+curl -s --location --request POST 'http://onto.dev.umccr.org/fhir/ValueSet/$expand' \
+--header 'Content-Type: application/fhir+json' \
 --data-raw '{
         "resourceType": "Parameters",
         "parameter": [
@@ -13,12 +13,11 @@ curl --location --request POST 'http://localhost:8080/fhir/ValueSet/$expand' \
                         "include": [
                             {
                                 "system": "http://purl.obolibrary.org/obo/hp.owl",
-                                "version": "2019-06-03",
                                 "filter": [
                                     {
                                         "property": "concept",
                                         "op": "is-a",
-                                        "value": "HP:0000118"
+                                        "value": "HP:0000598"
                                     }
                                 ]
                             }
