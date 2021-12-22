@@ -30,4 +30,19 @@ then
   putCodeSystem hpo "${TO_LOAD_LOCATION}/hp.json"
 fi
 
+if [ -n "$HGNC_RELEASE" ]
+then
+  putCodeSystem hgnc "${TO_LOAD_LOCATION}/hgnc.json"
+fi
+
+if [ -n "$HANCESTRO_RELEASE" ]
+then
+  putCodeSystem hancestro "${TO_LOAD_LOCATION}/hancestro.json"
+fi
+
+if [ -n "$MONDO_RELEASE" ]
+then
+  putCodeSystem mondo "${TO_LOAD_LOCATION}/mondo.json"
+fi
+
 . "${SCRIPT_LOCATION}/stop-services-during-build.sh"
