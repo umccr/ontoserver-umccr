@@ -2,8 +2,8 @@ import { pipelines, Stack, StackProps, Stage, StageProps } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { OntoserverApplicationStage } from "./lib/ontoserver-stack";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
-import {StringParameter} from "aws-cdk-lib/aws-ssm";
-import {PolicyStatement} from "aws-cdk-lib/aws-iam";
+import { StringParameter } from "aws-cdk-lib/aws-ssm";
+import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 
 /**
  * Stack to hold the self mutating pipeline, and all the relevant settings for deployments
@@ -12,7 +12,10 @@ export class OntoserverPipelineStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const codeStarArn = StringParameter.valueFromLookup(this, "codestar_github_arn");
+    const codeStarArn = StringParameter.valueFromLookup(
+      this,
+      "codestar_github_arn"
+    );
 
     const customRegSecret = Secret.fromSecretPartialArn(
       this,
@@ -40,17 +43,19 @@ export class OntoserverPipelineStack extends Stack {
           }
         ),
         commands: [
+          "pip install pre-commit",
+          "pre-commit run --all-files",
           "npm ci",
           // our cdk is configured to use ts-node - so we don't need any build step - just synth
-          "npx cdk synth -vvv"
+          "npx cdk synth",
         ],
         rolePolicyStatements: [
           new PolicyStatement({
-            actions: ['sts:AssumeRole'],
-            resources: ['*'],
+            actions: ["sts:AssumeRole"],
+            resources: ["*"],
             conditions: {
               StringEquals: {
-                'iam:ResourceTag/aws-cdk:bootstrap-role': 'lookup',
+                "iam:ResourceTag/aws-cdk:bootstrap-role": "lookup",
               },
             },
           }),
