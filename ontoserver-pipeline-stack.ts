@@ -26,8 +26,8 @@ export class OntoserverPipelineStack extends Stack {
       dockerCredentials: [
         pipelines.DockerCredential.customRegistry("quay.io", customRegSecret),
       ],
-      // turned on because the pipeline uses Docker image assets
-      dockerEnabledForSelfMutation: true,
+      // turned on because our stack makes docker assets
+      dockerEnabledForSynth: true,
       synth: new pipelines.CodeBuildStep("Synth", {
         // Use a connection created using the AWS console to authenticate to GitHub
         // Other sources are available.
