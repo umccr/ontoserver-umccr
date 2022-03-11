@@ -1,14 +1,22 @@
+#
+# HGNC
+#
 FROM openjdk:18 AS hgncbuilder
 ARG HGNC_RELEASE=""
 
 WORKDIR /app
 
 RUN microdnf install wget unzip
+# note: this is the *tool* we use to generate HGNC FHIR sets.. not the version of HGNC itself
+# the version of this will need to be manually updated as the tool evolves (see https://github.com/aehrc/fhir-hgnc)
 RUN wget https://github.com/aehrc/fhir-hgnc/releases/download/v0.2.0/fhir-hgnc-0.2.0.jar -O fhir-hgnc.jar
 
 RUN test ! -z "$HGNC_RELEASE" && wget "http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/archive/quarterly/json/hgnc_complete_set_$HGNC_RELEASE.json" -O hgnc_complete_set.json || true
 RUN test ! -z "$HGNC_RELEASE" && java -jar fhir-hgnc.jar -igi hgnc_complete_set.json -ogi hgnc.json || true
 
+#
+# Pierian
+#
 FROM python:3.8 AS pierianbuilder
 
 COPY tools/pieriandx/* /app/
@@ -29,6 +37,10 @@ RUN gzip -d disease.xlsx.gz
 RUN gzip -d specimen.xls.gz
 RUN python main.py
 
+#
+# OWL ontologies
+#   HPO, ANCESTRO, MONDO
+#
 FROM openjdk:18 AS owlbuilder
 ARG HPO_RELEASE=""
 ARG HANCESTRO_RELEASE=""
@@ -65,6 +77,9 @@ RUN test ! -z "$MONDO_RELEASE" && java -jar fhir-owl.jar -i mondo.owl -v "$MONDO
 
 RUN ls -al /app
 
+#
+# Ontoserver
+#
 FROM quay.io/aehrc/ontoserver:ctsa-6.6.3
 
 ARG client_id_arg=""
