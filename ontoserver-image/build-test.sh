@@ -2,7 +2,7 @@
 # to the docker image and want to test things outside of CDK, this script is just a normal
 # Docker built with args set
 
-docker build . \
+docker build . --progress plain \
          --build-arg HGNC_RELEASE=2021-10-01 \
          --build-arg HPO_RELEASE=2021-10-10 \
          --build-arg HANCESTRO_RELEASE=2.5 \

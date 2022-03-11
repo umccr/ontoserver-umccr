@@ -39,29 +39,33 @@ WORKDIR /app
 RUN microdnf install wget unzip
 RUN wget https://github.com/aehrc/fhir-owl/releases/download/v1.1/fhir-owl-v1.1.jar -O fhir-owl.jar
 
+# start with all the downloads so that we won't need to re-download as we debug the rest of our builder
 RUN test ! -z "$HPO_RELEASE" && wget "https://github.com/obophenotype/human-phenotype-ontology/archive/refs/tags/v$HPO_RELEASE.zip" -O hpo.zip || true
+RUN test ! -z "$HANCESTRO_RELEASE" && wget "https://github.com/EBISPOT/ancestro/archive/refs/tags/$HANCESTRO_RELEASE.zip" -O hancestro.zip || true
+RUN test ! -z "$MONDO_RELEASE" && wget "https://github.com/monarch-initiative/mondo/releases/download/v$MONDO_RELEASE/mondo.owl" -O mondo.owl || true
+
+# convert the OWL files into FHIR JSON codesystem bundles
 RUN test ! -z "$HPO_RELEASE" && unzip -j hpo.zip "*/hp.owl" || true
 RUN test ! -z "$HPO_RELEASE" && java -jar fhir-owl.jar -i hp.owl -v "$HPO_RELEASE" -o hp.json \
-         -id hpo -name "Human Phenotype Ontology" -content not-present \
-         -mainNs http://purl.obolibrary.org/obo/HP_ \
-         -descriptionProp http://purl.org/dc/elements/1.1/subject \
-         -status active -codeReplace "_,:" || true
+                -id hpo -name "Human Phenotype Ontology" -content not-present \
+                -mainNs http://purl.obolibrary.org/obo/HP_ \
+                -descriptionProp http://purl.org/dc/elements/1.1/subject \
+                -status active -codeReplace "_,:" || true
 
-RUN test ! -z "$HANCESTRO_RELEASE" && wget "https://github.com/EBISPOT/ancestro/archive/refs/tags/$HANCESTRO_RELEASE.zip" -O hancestro.zip || true
 RUN test ! -z "$HANCESTRO_RELEASE" && unzip -j hancestro.zip "*/hancestro.owl" || true
 RUN test ! -z "$HANCESTRO_RELEASE" && java -jar fhir-owl.jar -i hancestro.owl -v "$HANCESTRO_RELEASE" -o hancestro.json \
-                                           -id hancestro -name "Human Ancestry Ontology" \
-                                           -mainNs http://purl.obolibrary.org/obo/HANCESTRO_ \
-                                           -status active -codeReplace "_,:" || true
+                -id hancestro -name "Human Ancestry Ontology" \
+                -mainNs http://purl.obolibrary.org/obo/HANCESTRO_ \
+                -status active -codeReplace "_,:" || true
 
-RUN test ! -z "$MONDO_RELEASE" && wget "https://github.com/monarch-initiative/mondo/archive/refs/tags/v$MONDO_RELEASE.zip" -O mondo.zip || true
-RUN test ! -z "$MONDO_RELEASE" && unzip -j mondo.zip mondo.owl || true
 RUN test ! -z "$MONDO_RELEASE" && java -jar fhir-owl.jar -i mondo.owl -v "$MONDO_RELEASE" -o mondo.json \
-                                           -id mondo -name "MONDO: Monarch Disease Ontology" \
-                                           -mainNs http://purl.obolibrary.org/obo/MONDO_ \
-                                           -status active -codeReplace "_,:" || true
+                -id mondo -name "MONDO: Monarch Disease Ontology" \
+                -mainNs http://purl.obolibrary.org/obo/MONDO_ \
+                -status active -codeReplace "_,:" || true
 
-FROM quay.io/aehrc/ontoserver:ctsa-6.6.1
+RUN ls -al /app
+
+FROM quay.io/aehrc/ontoserver:ctsa-6.6.3
 
 ARG client_id_arg=""
 ARG client_secret_arg=""
@@ -99,10 +103,12 @@ COPY --from=hgncbuilder /app/*.json $TO_LOAD_LOCATION/
 COPY --from=pierianbuilder /app/*.json $TO_LOAD_LOCATION/
 COPY --from=owlbuilder /app/*.json $TO_LOAD_LOCATION/
 
+RUN ls -al $TO_LOAD_LOCATION/
+
 # Do the actual data loading
 RUN /script/init-codesystems-and-valuesets.sh
 
-# Data has been loaded into the onto db - no longer need the files on disk
+# Data has been loaded into the onto db - no longer need the files on disk *in* the ontoserver image
 RUN rm -rf "$TO_LOAD_LOCATION"
 
 # We want our regular ontoserver entrypoint - but we need to get in first and start postgres

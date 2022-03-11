@@ -25,14 +25,14 @@ then
   echo $(/index.sh -v ${SNOMED_RELEASE})
 fi
 
-if [ -n "$HPO_RELEASE" ]
-then
-  putCodeSystem hpo "${TO_LOAD_LOCATION}/hp.json"
-fi
-
 if [ -n "$HGNC_RELEASE" ]
 then
   putCodeSystem hgnc "${TO_LOAD_LOCATION}/hgnc.json"
+fi
+
+if [ -n "$HPO_RELEASE" ]
+then
+  putCodeSystem hpo "${TO_LOAD_LOCATION}/hp.json"
 fi
 
 if [ -n "$HANCESTRO_RELEASE" ]
