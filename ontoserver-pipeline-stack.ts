@@ -22,12 +22,13 @@ export class OntoserverPipelineStack extends Stack {
 
     const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
       // should normally be commented out - only use when debugging pipeline itself
-      selfMutation: false,
+      // selfMutation: false,
       dockerCredentials: [
         pipelines.DockerCredential.customRegistry("quay.io", customRegSecret),
       ],
       // turned on because our stack makes docker assets
       dockerEnabledForSynth: true,
+      dockerEnabledForSelfMutation: true,
       synth: new pipelines.CodeBuildStep("Synth", {
         // Use a connection created using the AWS console to authenticate to GitHub
         // Other sources are available.
@@ -40,8 +41,8 @@ export class OntoserverPipelineStack extends Stack {
         ),
         commands: [
           "npm ci",
-          "npm run build",
-          "npx cdk synth"
+          // our cdk is configured to use ts-node - so we don't need any build step - just synth
+          "npx cdk synth -vvv"
         ],
         rolePolicyStatements: [
           new PolicyStatement({
