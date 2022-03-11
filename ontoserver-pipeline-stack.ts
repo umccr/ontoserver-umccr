@@ -94,8 +94,8 @@ export class OntoserverPipelineStack extends Stack {
       ],
     });
 
-    pipeline.addStage(prodStage, {
-      pre: [new pipelines.ManualApprovalStep("PromoteToProd")],
-    });
+    // pipeline.addStage(prodStage, {
+    //  pre: [new pipelines.ManualApprovalStep("PromoteToProd")],
+    // });
   }
 }
