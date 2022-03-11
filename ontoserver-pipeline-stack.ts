@@ -44,7 +44,7 @@ export class OntoserverPipelineStack extends Stack {
         ),
         commands: [
           "pip install pre-commit",
-          "pre-commit run --all-files",
+          "git init . && pre-commit run --all-files",
           "npm ci",
           // our cdk is configured to use ts-node - so we don't need any build step - just synth
           "npx cdk synth",
