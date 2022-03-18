@@ -63,6 +63,7 @@ export class OntoserverPipelineStack extends Stack {
           // our cdk is configured to use ts-node - so we don't need any build step - just synth
           "npx cdk synth",
         ],
+
         rolePolicyStatements: [
           new PolicyStatement({
             actions: ["sts:AssumeRole"],
@@ -137,8 +138,8 @@ export class OntoserverPipelineStack extends Stack {
       ],
     });
 
-    pipeline.addStage(prodStage, {
-      pre: [new pipelines.ManualApprovalStep("PromoteToProd")],
-    });
+    //pipeline.addStage(prodStage, {
+    //  pre: [new pipelines.ManualApprovalStep("PromoteToProd")],
+    //});
   }
 }
