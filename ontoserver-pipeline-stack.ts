@@ -52,7 +52,7 @@ export class OntoserverPipelineStack extends Stack {
           }
         ),
         env: {
-          GITGUARDIAN_API_KEY: gitGuardianSecret.secretValue.toString(),
+          // GITGUARDIAN_API_KEY: gitGuardianSecret.secretValue.toString(),
         },
         commands: [
           // need to think how to get pre-commit to run in CI given .git is not present
