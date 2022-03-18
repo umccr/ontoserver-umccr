@@ -1,4 +1,4 @@
-import { Stack, StackProps, Stage, StageProps } from "aws-cdk-lib";
+import { CfnOutput, Stack, StackProps, Stage, StageProps } from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { DockerImageAsset } from "aws-cdk-lib/aws-ecr-assets";
 import { join } from "path";
@@ -34,6 +34,8 @@ export interface OntoserverSettings {
 }
 
 export class OntoserverApplicationStage extends Stage {
+  public readonly assetUriOutput: CfnOutput;
+
   constructor(
     scope: Construct,
     id: string,
@@ -41,11 +43,15 @@ export class OntoserverApplicationStage extends Stage {
   ) {
     super(scope, id, props);
 
-    new OntoserverStack(this, "Ontoserver", props);
+    const stack = new OntoserverStack(this, "Ontoserver", props);
+
+    this.assetUriOutput = stack.assetUriOutput;
   }
 }
 
 export class OntoserverStack extends Stack {
+  public readonly assetUriOutput: CfnOutput;
+
   constructor(
     scope: Construct,
     id: string,
@@ -104,5 +110,9 @@ export class OntoserverStack extends Stack {
         },
       }
     );
+
+    this.assetUriOutput = new CfnOutput(this, "AssetUriOutput", {
+      value: asset.imageUri,
+    });
   }
 }

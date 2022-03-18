@@ -1,4 +1,4 @@
-curl -s --location --request POST 'http://onto.dev.umccr.org/fhir/ValueSet/$expand' \
+curl -s --location --request POST 'https://onto.dev.umccr.org/fhir/ValueSet/$expand' \
 --header 'Content-Type: application/fhir+json' \
 --data-raw '{
         "resourceType": "Parameters",
