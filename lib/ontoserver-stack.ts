@@ -34,7 +34,11 @@ export interface OntoserverSettings {
 }
 
 export class OntoserverApplicationStage extends Stage {
+  // the output of our built ontoserver asset Uri
   public readonly assetUriOutput: CfnOutput;
+
+  // the output of what we believe will be the deployed FHIR base url (e.g. https://onto.prod.umccr.org/fhir)
+  public readonly deployFhirBaseUrlOutput: CfnOutput;
 
   constructor(
     scope: Construct,
@@ -46,11 +50,13 @@ export class OntoserverApplicationStage extends Stage {
     const stack = new OntoserverStack(this, "Ontoserver", props);
 
     this.assetUriOutput = stack.assetUriOutput;
+    this.deployFhirBaseUrlOutput = stack.deployFhirBaseUrlOutput;
   }
 }
 
 export class OntoserverStack extends Stack {
   public readonly assetUriOutput: CfnOutput;
+  public readonly deployFhirBaseUrlOutput: CfnOutput;
 
   constructor(
     scope: Construct,
@@ -114,5 +120,13 @@ export class OntoserverStack extends Stack {
     this.assetUriOutput = new CfnOutput(this, "AssetUriOutput", {
       value: asset.imageUri,
     });
+
+    this.deployFhirBaseUrlOutput = new CfnOutput(
+      this,
+      "DeployFhirBaseUrlOutput",
+      {
+        value: `https://${props.hostNamePrefix}.${hostedZoneName}/fhir`,
+      }
+    );
   }
 }

@@ -63,7 +63,6 @@ export class OntoserverPipelineStack extends Stack {
           // our cdk is configured to use ts-node - so we don't need any build step - just synth
           "npx cdk synth",
         ],
-
         rolePolicyStatements: [
           new PolicyStatement({
             actions: ["sts:AssumeRole"],
@@ -124,15 +123,13 @@ export class OntoserverPipelineStack extends Stack {
       post: [
         new pipelines.ShellStep("Validate Endpoint", {
           envFromCfnOutputs: {
-            // Make the load balancer address available as $URL inside the commands
-            ASSET_URI: devStage.assetUriOutput,
+            FHIR_BASE_URL: devStage.deployFhirBaseUrlOutput,
           },
           commands: [
-            "echo $ASSET_URI",
-            "docker images",
+            "echo $FHIR_BASE_URL",
             "cd test/onto-cli",
             "npm ci",
-            `npm run test -- https://${hostNamePrefix}.dev.umccr.org/fhir`,
+            `npm run test -- "$FHIR_BASE_URL"`,
           ],
         }),
       ],
