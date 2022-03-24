@@ -11,6 +11,7 @@ import {
 } from "aws-cdk-lib/aws-ec2";
 import { ApplicationLoadBalancedFargateService } from "aws-cdk-lib/aws-ecs-patterns";
 import { Cluster, ContainerImage } from "aws-cdk-lib/aws-ecs";
+import { Duration } from "aws-cdk-lib/core/lib/duration";
 
 type IsolatedDockerServiceWithLoadBalancerProps = {
   hostPrefix: string;
@@ -91,6 +92,7 @@ export class IsolatedDockerServiceWithLoadBalancerConstruct extends Construct {
           containerPort: 80,
           environment: props.environment,
         },
+        healthCheckGracePeriod: Duration.minutes(5),
       });
 
     if (props.healthCheckPath) {
