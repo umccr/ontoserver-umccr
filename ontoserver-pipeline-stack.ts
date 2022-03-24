@@ -1,4 +1,11 @@
-import { pipelines, Stack, StackProps, Stage, StageProps } from "aws-cdk-lib";
+import {
+  pipelines,
+  Stack,
+  StackProps,
+  Stage,
+  StageProps,
+  Token,
+} from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { OntoserverApplicationStage } from "./lib/ontoserver-stack";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
@@ -12,23 +19,27 @@ export class OntoserverPipelineStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
+    // these are *build* parameters that we either want to re-use across lots of stacks, or are
+    // 'sensitive' enough we don't want them checked into Git - but not sensitive enough to record as a Secret
     const codeStarArn = StringParameter.valueFromLookup(
       this,
       "codestar_github_arn"
     );
+    const nctsClientId = StringParameter.valueFromLookup(
+      this,
+      "ncts_client_id"
+    );
+    const nctsClientSecret = StringParameter.valueFromLookup(
+      this,
+      "ncts_client_secret"
+    );
 
     // this secret has username/password fields in it - and AWS pipeline itself knows how
     // to convert those into docker auth credentials
-    const quayIoSecret = Secret.fromSecretPartialArn(
+    const quayIoSecret = Secret.fromSecretNameV2(
       this,
-      "QuayIoSecret",
-      "arn:aws:secretsmanager:ap-southeast-2:383856791668:secret:QuayIoBot"
-    );
-
-    const nctsSnomedSecret = Secret.fromSecretPartialArn(
-      this,
-      "NctsSnomedSecret",
-      "arn:aws:secretsmanager:ap-southeast-2:383856791668:secret:NctsSnomed"
+      "QuayIoBotSecret",
+      "QuayIoBot"
     );
 
     const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
@@ -71,25 +82,10 @@ export class OntoserverPipelineStack extends Stack {
               },
             },
           }),
-          /*          new PolicyStatement({
-            effect: Effect.ALLOW,
-            actions: [
-              "secretsmanager:GetRandomPassword",
-              "secretsmanager:GetResourcePolicy",
-              "secretsmanager:GetSecretValue",
-              "secretsmanager:DescribeSecret",
-              "secretsmanager:ListSecretVersionIds",
-            ],
-            resources: [gitGuardianSecret.secretArn],
-          }), */
         ],
       }),
       crossAccountKeys: true,
     });
-
-    console.log(nctsSnomedSecret.secretValue.toJSON());
-
-    const ncts = nctsSnomedSecret.secretValue.toJSON();
 
     const ontologies = {
       HGNC_RELEASE: "2021-10-01",
@@ -97,8 +93,8 @@ export class OntoserverPipelineStack extends Stack {
       HANCESTRO_RELEASE: "2.5",
       MONDO_RELEASE: "2021-12-01",
       SNOMED_RELEASE: "20211231",
-      NCTS_CLIENT_ID: ncts.client_id,
-      NCTS_CLIENT_SECRET: ncts.client_secret,
+      NCTS_CLIENT_ID: nctsClientId,
+      NCTS_CLIENT_SECRET: nctsClientSecret,
     };
     const hostNamePrefix = "onto";
 
