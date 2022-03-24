@@ -11,7 +11,7 @@ import {
 } from "aws-cdk-lib/aws-ec2";
 import { ApplicationLoadBalancedFargateService } from "aws-cdk-lib/aws-ecs-patterns";
 import { Cluster, ContainerImage } from "aws-cdk-lib/aws-ecs";
-import { Duration } from "aws-cdk-lib/core/lib/duration";
+import { Duration } from "aws-cdk-lib";
 
 type IsolatedDockerServiceWithLoadBalancerProps = {
   hostPrefix: string;
