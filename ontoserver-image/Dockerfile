@@ -82,8 +82,8 @@ RUN ls -al /app
 #
 FROM quay.io/aehrc/ontoserver:ctsa-6.6.3
 
-ARG client_id_arg=""
-ARG client_secret_arg=""
+ARG NCTS_CLIENT_ID=""
+ARG NCTS_CLIENT_SECRET=""
 ARG SNOMED_RELEASE=""
 ARG HGNC_RELEASE=""
 ARG HPO_RELEASE=""
@@ -100,8 +100,8 @@ RUN initdb -D /var/lib/postgresql/data
 USER root
 
 # Docker build variables
-ENV authentication.oauth.endpoint.client_id.0 $client_id_arg
-ENV authentication.oauth.endpoint.client_secret.0 $client_secret_arg
+ENV authentication.oauth.endpoint.client_id.0 $NCTS_CLIENT_ID
+ENV authentication.oauth.endpoint.client_secret.0 $NCTS_CLIENT_SECRET
 ENV ONTOSERVER_INSECURE 'true'
 
 RUN echo Settings are HGNC $HGNC_RELEASE, HPO $HPO_RELEASE, SNOMED $SNOMED_RELEASE, HANCESTRO $HANCESTRO_RELEASE, MONDO $MONDO_RELEASE

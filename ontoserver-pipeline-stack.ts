@@ -25,10 +25,10 @@ export class OntoserverPipelineStack extends Stack {
       "arn:aws:secretsmanager:ap-southeast-2:383856791668:secret:QuayIoBot"
     );
 
-    const gitGuardianSecret = Secret.fromSecretPartialArn(
+    const nctsSnomedSecret = Secret.fromSecretPartialArn(
       this,
-      "GitGuardianApiSecret",
-      "arn:aws:secretsmanager:ap-southeast-2:383856791668:secret:GitGuardianApi"
+      "NctsSnomedSecret",
+      "arn:aws:secretsmanager:ap-southeast-2:383856791668:secret:NctsSnomed"
     );
 
     const pipeline = new pipelines.CodePipeline(this, "Pipeline", {
@@ -51,14 +51,12 @@ export class OntoserverPipelineStack extends Stack {
             connectionArn: codeStarArn,
           }
         ),
-        env: {
-          // GITGUARDIAN_API_KEY: gitGuardianSecret.secretValue.toString(),
-        },
+        env: {},
         commands: [
           // need to think how to get pre-commit to run in CI given .git is not present
           // "pip install pre-commit",
           // "git init . && pre-commit run --all-files",
-          "pip install -U ggshield",
+          // "pip install -U ggshield",
           "npm ci",
           // our cdk is configured to use ts-node - so we don't need any build step - just synth
           "npx cdk synth",
@@ -89,11 +87,18 @@ export class OntoserverPipelineStack extends Stack {
       crossAccountKeys: true,
     });
 
+    console.log(nctsSnomedSecret.secretValue.toJSON());
+
+    const ncts = nctsSnomedSecret.secretValue.toJSON();
+
     const ontologies = {
       HGNC_RELEASE: "2021-10-01",
       HPO_RELEASE: "2021-10-10",
       HANCESTRO_RELEASE: "2.5",
       MONDO_RELEASE: "2021-12-01",
+      SNOMED_RELEASE: "20211231",
+      NCTS_CLIENT_ID: ncts.client_id,
+      NCTS_CLIENT_SECRET: ncts.client_secret,
     };
     const hostNamePrefix = "onto";
 
@@ -135,8 +140,8 @@ export class OntoserverPipelineStack extends Stack {
       ],
     });
 
-    //pipeline.addStage(prodStage, {
-    //  pre: [new pipelines.ManualApprovalStep("PromoteToProd")],
-    //});
+    pipeline.addStage(prodStage, {
+      pre: [new pipelines.ManualApprovalStep("PromoteToProd")],
+    });
   }
 }
