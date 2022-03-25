@@ -7,6 +7,11 @@ function putCodeSystem ()
     curl -sS --fail -X PUT "http://localhost:8080/fhir/CodeSystem/$1" -H 'Prefer: return=OperationOutcome' -H 'Content-Type: application/fhir+json' --data "@$2"
 }
 
+function postCodeSystem ()
+{
+    curl -sS --fail -X POST "http://localhost:8080/fhir/CodeSystem" -H 'Prefer: return=OperationOutcome' -H 'Content-Type: application/fhir+json' --data "@$2"
+}
+
 function putValueSet ()
 {
     curl -sS --fail -X PUT "http://localhost:8080/fhir/ValueSet/$1" -H 'Prefer: return=OperationOutcome' -H 'Content-Type: application/fhir+json' --data "@$2"
@@ -27,7 +32,7 @@ fi
 
 if [ -n "$HGNC_RELEASE" ]
 then
-  putCodeSystem hgnc "${TO_LOAD_LOCATION}/hgnc.json"
+  postCodeSystem hgnc "${TO_LOAD_LOCATION}/hgnc.json"
 fi
 
 if [ -n "$HPO_RELEASE" ]

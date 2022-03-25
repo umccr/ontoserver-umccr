@@ -87,11 +87,17 @@ export class OntoserverPipelineStack extends Stack {
       crossAccountKeys: true,
     });
 
+    // can track releases at
+    // HGNC  http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/archive/quarterly/json
+    // HPO  https://github.com/obophenotype/human-phenotype-ontology/releases
+    // HANCESTRO  https://github.com/EBISPOT/ancestro/releases
+    // Mondo  https://github.com/monarch-initiative/mondo/releases
+    // SNOMED  see NCTS
     const ontologies = {
-      HGNC_RELEASE: "2021-10-01",
-      HPO_RELEASE: "2021-10-10",
+      HGNC_RELEASE: "2022-01-01",
+      HPO_RELEASE: "2022-02-14",
       HANCESTRO_RELEASE: "2.5",
-      MONDO_RELEASE: "2021-12-01",
+      MONDO_RELEASE: "2022-03-01",
       SNOMED_RELEASE: "20211231",
       NCTS_CLIENT_ID: nctsClientId,
       NCTS_CLIENT_SECRET: nctsClientSecret,
