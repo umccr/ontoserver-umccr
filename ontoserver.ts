@@ -13,4 +13,7 @@ new OntoserverPipelineStack(app, "OntoserverPipelineStack", {
     account: AWS_BUILD_ACCOUNT,
     region: AWS_BUILD_REGION,
   },
+  tags: {
+    Stack: "Ontoserver",
+  },
 });

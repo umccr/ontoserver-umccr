@@ -9,9 +9,9 @@ WORKDIR /app
 RUN microdnf install wget unzip
 # note: this is the *tool* we use to generate HGNC FHIR sets.. not the version of HGNC itself
 # the version of this will need to be manually updated as the tool evolves (see https://github.com/aehrc/fhir-hgnc)
-RUN wget https://github.com/aehrc/fhir-hgnc/releases/download/v0.2.0/fhir-hgnc-0.2.0.jar -O fhir-hgnc.jar
+RUN wget --progress=bar:giga https://github.com/aehrc/fhir-hgnc/releases/download/v0.2.0/fhir-hgnc-0.2.0.jar -O fhir-hgnc.jar
 
-RUN test ! -z "$HGNC_RELEASE" && wget "http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/archive/quarterly/json/hgnc_complete_set_$HGNC_RELEASE.json" -O hgnc_complete_set.json || true
+RUN test ! -z "$HGNC_RELEASE" && wget --progress=bar:giga "http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/archive/quarterly/json/hgnc_complete_set_$HGNC_RELEASE.json" -O hgnc_complete_set.json || true
 RUN test ! -z "$HGNC_RELEASE" && java -jar fhir-hgnc.jar -igi hgnc_complete_set.json -ogi hgnc.json || true
 
 #
@@ -49,12 +49,12 @@ ARG MONDO_RELEASE=""
 WORKDIR /app
 
 RUN microdnf install wget unzip
-RUN wget https://github.com/aehrc/fhir-owl/releases/download/v1.1/fhir-owl-v1.1.jar -O fhir-owl.jar
+RUN wget --progress=bar:giga https://github.com/aehrc/fhir-owl/releases/download/v1.1/fhir-owl-v1.1.jar -O fhir-owl.jar
 
 # start with all the downloads so that we won't need to re-download as we debug the rest of our builder
-RUN test ! -z "$HPO_RELEASE" && wget "https://github.com/obophenotype/human-phenotype-ontology/archive/refs/tags/v$HPO_RELEASE.zip" -O hpo.zip || true
-RUN test ! -z "$HANCESTRO_RELEASE" && wget "https://github.com/EBISPOT/ancestro/archive/refs/tags/$HANCESTRO_RELEASE.zip" -O hancestro.zip || true
-RUN test ! -z "$MONDO_RELEASE" && wget "https://github.com/monarch-initiative/mondo/releases/download/v$MONDO_RELEASE/mondo.owl" -O mondo.owl || true
+RUN test ! -z "$HPO_RELEASE" && wget --progress=bar:giga "https://github.com/obophenotype/human-phenotype-ontology/archive/refs/tags/v$HPO_RELEASE.zip" -O hpo.zip || true
+RUN test ! -z "$HANCESTRO_RELEASE" && wget --progress=bar:giga "https://github.com/EBISPOT/ancestro/archive/refs/tags/$HANCESTRO_RELEASE.zip" -O hancestro.zip || true
+RUN test ! -z "$MONDO_RELEASE" && wget --progress=bar:giga "https://github.com/monarch-initiative/mondo/releases/download/v$MONDO_RELEASE/mondo.owl" -O mondo.owl || true
 
 # convert the OWL files into FHIR JSON codesystem bundles
 RUN test ! -z "$HPO_RELEASE" && unzip -j hpo.zip "*/hp.owl" || true
@@ -70,7 +70,7 @@ RUN test ! -z "$HANCESTRO_RELEASE" && java -jar fhir-owl.jar -i hancestro.owl -v
                 -mainNs http://purl.obolibrary.org/obo/HANCESTRO_ \
                 -status active -codeReplace "_,:" || true
 
-RUN test ! -z "$MONDO_RELEASE" && java -jar fhir-owl.jar -i mondo.owl -v "$MONDO_RELEASE" -o mondo.json \
+RUN test ! -z "$MONDO_RELEASE" && java -Xmx1024m -jar fhir-owl.jar -i mondo.owl -v "$MONDO_RELEASE" -o mondo.json \
                 -id mondo -name "MONDO: Monarch Disease Ontology" \
                 -mainNs http://purl.obolibrary.org/obo/MONDO_ \
                 -status active -codeReplace "_,:" || true
