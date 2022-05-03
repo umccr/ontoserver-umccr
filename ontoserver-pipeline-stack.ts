@@ -1,16 +1,20 @@
-import {
-  pipelines,
-  Stack,
-  StackProps,
-  Stage,
-  StageProps,
-  Token,
-} from "aws-cdk-lib";
+import { pipelines, Stack, StackProps } from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { OntoserverApplicationStage } from "./lib/ontoserver-stack";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { StringParameter } from "aws-cdk-lib/aws-ssm";
-import { Effect, PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { OntoserverBuildStage } from "./ontoserver-build-stage";
+import {
+  AWS_DEV_ACCOUNT,
+  AWS_DEV_REGION,
+  AWS_PROD_ACCOUNT,
+  AWS_PROD_REGION,
+} from "./umccr-constants";
+import {
+  CURRENT_ONTOLOGIES,
+  HOST_PREFIX,
+  STACK_DESCRIPTION,
+} from "./ontoserver-constants";
 
 /**
  * Stack to hold the self mutating pipeline, and all the relevant settings for deployments
@@ -18,6 +22,8 @@ import { Effect, PolicyStatement } from "aws-cdk-lib/aws-iam";
 export class OntoserverPipelineStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
+
+    this.templateOptions.description = STACK_DESCRIPTION;
 
     // these are *build* parameters that we either want to re-use across lots of stacks, or are
     // 'sensitive' enough we don't want them checked into Git - but not sensitive enough to record as a Secret
@@ -36,6 +42,7 @@ export class OntoserverPipelineStack extends Stack {
 
     // this secret has username/password fields in it - and AWS pipeline itself knows how
     // to convert those into docker auth credentials
+    // this credentials is needed to access the base Ontoserver image published by CSIRO/AEHRC
     const quayIoSecret = Secret.fromSecretNameV2(
       this,
       "QuayIoBotSecret",
@@ -67,7 +74,6 @@ export class OntoserverPipelineStack extends Stack {
           // need to think how to get pre-commit to run in CI given .git is not present
           // "pip install pre-commit",
           // "git init . && pre-commit run --all-files",
-          // "pip install -U ggshield",
           "npm ci",
           // our cdk is configured to use ts-node - so we don't need any build step - just synth
           "npx cdk synth",
@@ -87,40 +93,29 @@ export class OntoserverPipelineStack extends Stack {
       crossAccountKeys: true,
     });
 
-    // can track releases at
-    // HGNC  http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/archive/quarterly/json
-    // HPO  https://github.com/obophenotype/human-phenotype-ontology/releases
-    // HANCESTRO  https://github.com/EBISPOT/ancestro/releases
-    // Mondo  https://github.com/monarch-initiative/mondo/releases
-    // SNOMED  see NCTS
-    const ontologies = {
-      HGNC_RELEASE: "2022-01-01",
-      HPO_RELEASE: "2022-02-14",
-      HANCESTRO_RELEASE: "2.5",
-      MONDO_RELEASE: "2022-03-01",
-      SNOMED_RELEASE: "20211231",
-      NCTS_CLIENT_ID: nctsClientId,
-      NCTS_CLIENT_SECRET: nctsClientSecret,
-    };
-    const hostNamePrefix = "onto";
+    const ontologies = { ...CURRENT_ONTOLOGIES };
 
-    const devStage = new OntoserverApplicationStage(this, "Dev", {
+    // need to augment this to allow credentials for SNOMED loading
+    ontologies["NCTS_CLIENT_ID"] = nctsClientId;
+    ontologies["NCTS_CLIENT_SECRET"] = nctsClientSecret;
+
+    const devStage = new OntoserverBuildStage(this, "Dev", {
       env: {
-        account: "843407916570",
-        region: "ap-southeast-2",
+        account: AWS_DEV_ACCOUNT,
+        region: AWS_DEV_REGION,
       },
-      hostNamePrefix: hostNamePrefix,
+      hostNamePrefix: HOST_PREFIX,
       ontologies: ontologies,
       desiredCount: 1,
       memoryLimitMiB: 2048,
     });
 
-    const prodStage = new OntoserverApplicationStage(this, "Prod", {
+    const prodStage = new OntoserverBuildStage(this, "Prod", {
       env: {
-        account: "472057503814",
-        region: "ap-southeast-2",
+        account: AWS_PROD_ACCOUNT,
+        region: AWS_PROD_REGION,
       },
-      hostNamePrefix: hostNamePrefix,
+      hostNamePrefix: HOST_PREFIX,
       ontologies: ontologies,
       desiredCount: 2,
       memoryLimitMiB: 4096,

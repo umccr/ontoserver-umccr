@@ -1,9 +1,8 @@
 import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
 import { OntoserverPipelineStack } from "./ontoserver-pipeline-stack";
-
-const AWS_BUILD_ACCOUNT = "383856791668";
-const AWS_BUILD_REGION = "ap-southeast-2";
+import { TAG_STACK_VALUE } from "./ontoserver-constants";
+import { AWS_BUILD_ACCOUNT, AWS_BUILD_REGION } from "./umccr-constants";
 
 const app = new cdk.App();
 
@@ -14,6 +13,6 @@ new OntoserverPipelineStack(app, "OntoserverPipelineStack", {
     region: AWS_BUILD_REGION,
   },
   tags: {
-    Stack: "Ontoserver",
+    Stack: TAG_STACK_VALUE,
   },
 });

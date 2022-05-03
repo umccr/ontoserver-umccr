@@ -3,56 +3,10 @@ import { Construct } from "constructs";
 import { DockerImageAsset } from "aws-cdk-lib/aws-ecr-assets";
 import { join } from "path";
 import { InterfaceVpcEndpointAwsService } from "aws-cdk-lib/aws-ec2";
-import { IsolatedDockerServiceWithLoadBalancerConstruct } from "./isolated-docker-service-with-load-balancer-construct";
+import { IsolatedDockerServiceWithLoadBalancerConstruct } from "./lib/isolated-docker-service-with-load-balancer-construct";
 import { StringParameter } from "aws-cdk-lib/aws-ssm";
-
-export interface OntoserverSettings {
-  /**
-   * The host name prefix (name before first dot in hostname)
-   */
-  readonly hostNamePrefix: string;
-
-  /**
-   * A dictionary of ontologies and their versions. Ontology names
-   * must match those understood by the Onto dockerfile.
-   * e.g.
-   *  { HGNC_RELEASE: "2021-10-01",
-   *    HPO_RELEASE: "2021-10-10" }
-   */
-  readonly ontologies: { [id: string]: string };
-
-  /**
-   * The number of services to have run concurrently. Needs to be greater than 1
-   * in order to get cross availability zone
-   */
-  readonly desiredCount: number;
-
-  /**
-   * The memory assigned to each service
-   */
-  readonly memoryLimitMiB: number;
-}
-
-export class OntoserverApplicationStage extends Stage {
-  // the output of our built ontoserver asset Uri
-  public readonly assetUriOutput: CfnOutput;
-
-  // the output of what we believe will be the deployed FHIR base url (e.g. https://onto.prod.umccr.org/fhir)
-  public readonly deployFhirBaseUrlOutput: CfnOutput;
-
-  constructor(
-    scope: Construct,
-    id: string,
-    props: StageProps & OntoserverSettings
-  ) {
-    super(scope, id, props);
-
-    const stack = new OntoserverStack(this, "Ontoserver", props);
-
-    this.assetUriOutput = stack.assetUriOutput;
-    this.deployFhirBaseUrlOutput = stack.deployFhirBaseUrlOutput;
-  }
-}
+import { OntoserverSettings } from "./ontoserver-settings";
+import { STACK_DESCRIPTION } from "../ontoserver-constants";
 
 export class OntoserverStack extends Stack {
   public readonly assetUriOutput: CfnOutput;
@@ -65,10 +19,13 @@ export class OntoserverStack extends Stack {
   ) {
     super(scope, id, props);
 
-    // the ontoserver image is a relatively complex build - with sub-builders for fetching each terminology
-    // files downloaded from the internet are meant to be stable (hgnc quarterly release json etc)
-    // - but there are no guarantees
-    const dockerImageFolder = join(__dirname, "..", "ontoserver-image");
+    this.templateOptions.description = STACK_DESCRIPTION;
+
+    // the ontoserver image is a relatively complex build - with sub-builders for fetching each terminology...
+    // the files we downloaded from the internet are meant to be stable (hgnc quarterly release json etc)
+    // - but there are no guarantees (i.e. if in the future this build is going to break - this is where it
+    // will happen and I don't have any solution other than trace through the docker build)
+    const dockerImageFolder = join(__dirname, "ontoserver-docker-image");
 
     const asset = new DockerImageAsset(this, "OntoserverImage", {
       directory: dockerImageFolder,
@@ -102,6 +59,7 @@ export class OntoserverStack extends Stack {
         hostCert: certApse2Arn,
         imageAsset: asset,
         awsPrivateLinksServices: [
+          // without these 3 service endpoints, Fargate itself will not work
           InterfaceVpcEndpointAwsService.ECR_DOCKER,
           InterfaceVpcEndpointAwsService.ECR,
           InterfaceVpcEndpointAwsService.CLOUDWATCH_LOGS,

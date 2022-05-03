@@ -2,7 +2,10 @@ import { Construct } from "constructs";
 import { DockerImageAsset } from "aws-cdk-lib/aws-ecr-assets";
 import { HostedZone } from "aws-cdk-lib/aws-route53";
 import { Certificate } from "aws-cdk-lib/aws-certificatemanager";
-import { SslPolicy } from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import {
+  ApplicationLoadBalancer,
+  SslPolicy,
+} from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import {
   GatewayVpcEndpointAwsService,
   InterfaceVpcEndpointAwsService,
@@ -10,7 +13,13 @@ import {
   Vpc,
 } from "aws-cdk-lib/aws-ec2";
 import { ApplicationLoadBalancedFargateService } from "aws-cdk-lib/aws-ecs-patterns";
-import { Cluster, ContainerImage } from "aws-cdk-lib/aws-ecs";
+import {
+  CfnService,
+  Cluster,
+  ContainerImage,
+  FargateService,
+  PropagatedTagSource,
+} from "aws-cdk-lib/aws-ecs";
 import { Duration } from "aws-cdk-lib";
 
 type IsolatedDockerServiceWithLoadBalancerProps = {
@@ -28,6 +37,8 @@ type IsolatedDockerServiceWithLoadBalancerProps = {
 };
 
 export class IsolatedDockerServiceWithLoadBalancerConstruct extends Construct {
+  private readonly service: ApplicationLoadBalancedFargateService;
+
   constructor(
     scope: Construct,
     id: string,
@@ -45,7 +56,7 @@ export class IsolatedDockerServiceWithLoadBalancerConstruct extends Construct {
     });
 
     const vpc: Vpc = new Vpc(this, "Vpc", {
-      // we mind as well span all azs available (our desired count defines the number of actual servers)
+      // we mind as well span all azs available (our desired count defines the number of *actual* servers)
       maxAzs: 99,
       // our services work when wholly isolated - so no NAT needed
       natGateways: 0,
@@ -75,30 +86,40 @@ export class IsolatedDockerServiceWithLoadBalancerConstruct extends Construct {
       vpc: vpc,
     });
 
-    const loadBalancedFargateService =
-      new ApplicationLoadBalancedFargateService(this, "Service", {
-        cluster,
-        certificate,
-        sslPolicy: SslPolicy.RECOMMENDED,
-        domainName: `${props.hostPrefix}.${props.hostZoneName}`,
-        domainZone,
-        redirectHTTP: true,
-        memoryLimitMiB: props.memoryLimitMiB,
-        cpu: props.cpu,
-        desiredCount: props.desiredCount,
-        publicLoadBalancer: true,
-        taskImageOptions: {
-          image: ContainerImage.fromDockerImageAsset(props.imageAsset),
-          containerPort: 80,
-          environment: props.environment,
-        },
-        healthCheckGracePeriod: Duration.minutes(5),
-      });
+    this.service = new ApplicationLoadBalancedFargateService(this, "Service", {
+      cluster,
+      certificate,
+      sslPolicy: SslPolicy.RECOMMENDED,
+      domainName: `${props.hostPrefix}.${props.hostZoneName}`,
+      domainZone,
+      redirectHTTP: true,
+      memoryLimitMiB: props.memoryLimitMiB,
+      cpu: props.cpu,
+      desiredCount: props.desiredCount,
+      publicLoadBalancer: true,
+      taskImageOptions: {
+        image: ContainerImage.fromDockerImageAsset(props.imageAsset),
+        containerPort: 80,
+        environment: props.environment,
+      },
+      healthCheckGracePeriod: Duration.minutes(5),
+      // we want the individual running service tasks to be tagged according to this overall stack
+      enableECSManagedTags: false,
+      propagateTags: PropagatedTagSource.SERVICE,
+    });
 
     if (props.healthCheckPath) {
-      loadBalancedFargateService.targetGroup.configureHealthCheck({
+      this.service.targetGroup.configureHealthCheck({
         path: props.healthCheckPath,
       });
     }
+  }
+
+  public getFargateService(): FargateService {
+    return this.service.service;
+  }
+
+  public getALB(): ApplicationLoadBalancer {
+    return this.service.loadBalancer;
   }
 }
