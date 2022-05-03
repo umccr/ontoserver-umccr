@@ -75,12 +75,10 @@ RUN test ! -z "$MONDO_RELEASE" && java -Xmx1024m -jar fhir-owl.jar -i mondo.owl 
                 -mainNs http://purl.obolibrary.org/obo/MONDO_ \
                 -status active -codeReplace "_,:" || true
 
-RUN ls -al /app
-
 #
 # Ontoserver
 #
-FROM quay.io/aehrc/ontoserver:ctsa-6.6.3
+FROM quay.io/aehrc/ontoserver:ctsa-6.7.1
 
 ARG NCTS_CLIENT_ID=""
 ARG NCTS_CLIENT_SECRET=""
