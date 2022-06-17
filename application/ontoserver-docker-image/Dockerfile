@@ -1,7 +1,7 @@
 #
 # HGNC
 #
-FROM openjdk:18 AS hgncbuilder
+FROM openjdk:18.0.1.1 AS hgncbuilder
 ARG HGNC_RELEASE=""
 
 WORKDIR /app
@@ -41,7 +41,7 @@ RUN python main.py
 # OWL ontologies
 #   HPO, ANCESTRO, MONDO
 #
-FROM openjdk:18 AS owlbuilder
+FROM openjdk:18.0.1.1 AS owlbuilder
 ARG HPO_RELEASE=""
 ARG HANCESTRO_RELEASE=""
 ARG MONDO_RELEASE=""
@@ -78,7 +78,7 @@ RUN test ! -z "$MONDO_RELEASE" && java -Xmx1024m -jar fhir-owl.jar -i mondo.owl 
 #
 # Ontoserver
 #
-FROM quay.io/aehrc/ontoserver:ctsa-6.7.1
+FROM quay.io/aehrc/ontoserver:ctsa-6.8.0
 
 ARG NCTS_CLIENT_ID=""
 ARG NCTS_CLIENT_SECRET=""
@@ -101,6 +101,7 @@ USER root
 ENV authentication.oauth.endpoint.client_id.0 $NCTS_CLIENT_ID
 ENV authentication.oauth.endpoint.client_secret.0 $NCTS_CLIENT_SECRET
 ENV ONTOSERVER_INSECURE 'true'
+ENV JAVA_OPTS '-Xmx8G'
 
 RUN echo Settings are HGNC $HGNC_RELEASE, HPO $HPO_RELEASE, SNOMED $SNOMED_RELEASE, HANCESTRO $HANCESTRO_RELEASE, MONDO $MONDO_RELEASE
 

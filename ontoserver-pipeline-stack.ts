@@ -15,6 +15,7 @@ import {
   HOST_PREFIX,
   STACK_DESCRIPTION,
 } from "./ontoserver-constants";
+import { ComputeType, LinuxBuildImage } from "aws-cdk-lib/aws-codebuild";
 
 /**
  * Stack to hold the self mutating pipeline, and all the relevant settings for deployments
@@ -69,6 +70,11 @@ export class OntoserverPipelineStack extends Stack {
             connectionArn: codeStarArn,
           }
         ),
+        buildEnvironment: {
+          computeType: ComputeType.LARGE,
+          //buildImage: LinuxBuildImage.AMAZON_LINUX_2_ARM_2,
+          //privileged: true,
+        },
         env: {},
         commands: [
           // need to think how to get pre-commit to run in CI given .git is not present

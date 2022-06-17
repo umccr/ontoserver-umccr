@@ -20,7 +20,7 @@ export const CURRENT_ONTOLOGIES: { [n: string]: string } = {
   HPO_RELEASE: "2022-02-14",
   HANCESTRO_RELEASE: "2.5",
   MONDO_RELEASE: "2022-03-01",
-  SNOMED_RELEASE: "20211231",
+  SNOMED_RELEASE: "20220531",
 };
 
 export const HOST_PREFIX = "onto";

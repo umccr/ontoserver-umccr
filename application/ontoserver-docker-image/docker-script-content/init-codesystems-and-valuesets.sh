@@ -17,18 +17,18 @@ function putValueSet ()
     curl -sS --fail -X PUT "http://localhost:8080/fhir/ValueSet/$1" -H 'Prefer: return=OperationOutcome' -H 'Content-Type: application/fhir+json' --data "@$2"
 }
 
-putValueSet pieriandx-disease "${TO_LOAD_LOCATION}/disease.json"
-putValueSet pieriandx-mass "${TO_LOAD_LOCATION}/mass.json"
-putValueSet pieriandx-uncertain-diagnosis "${TO_LOAD_LOCATION}/uncertain.json"
-putValueSet pieriandx-specimen-type "${TO_LOAD_LOCATION}/specimen.json"
-
 if [ -n "$SNOMED_RELEASE" ]
 then
   # Run ontoserver SNOMED index script
   # This file (index.sh) only exists in the base docker image provided as part of Ontoserver
   # We want the calling Docker to be able to fail so we need to print the result output
-  echo $(/index.sh -v ${SNOMED_RELEASE})
+  /index.sh -v "${SNOMED_RELEASE}"
 fi
+
+putValueSet pieriandx-disease "${TO_LOAD_LOCATION}/disease.json"
+putValueSet pieriandx-mass "${TO_LOAD_LOCATION}/mass.json"
+putValueSet pieriandx-uncertain-diagnosis "${TO_LOAD_LOCATION}/uncertain.json"
+putValueSet pieriandx-specimen-type "${TO_LOAD_LOCATION}/specimen.json"
 
 if [ -n "$HGNC_RELEASE" ]
 then
