@@ -1,4 +1,4 @@
-curl -s --location --request POST 'https://onto.dev.umccr.org/fhir/ValueSet/$expand' \
+curl -s --location --request POST 'http://localhost:8080/fhir/ValueSet/$expand' \
 --header 'Content-Type: application/fhir+json' \
 --data-raw '{
         "resourceType": "Parameters",
@@ -12,7 +12,7 @@ curl -s --location --request POST 'https://onto.dev.umccr.org/fhir/ValueSet/$exp
                     "compose": {
                         "include": [
                             {
-                                "system": "http://purl.obolibrary.org/obo/hp.owl",
+                                "system": "http://human-phenotype-ontology.org",
                                 "filter": [
                                     {
                                         "property": "concept",

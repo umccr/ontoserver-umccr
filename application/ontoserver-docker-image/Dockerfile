@@ -6,12 +6,13 @@ ARG HGNC_RELEASE=""
 
 WORKDIR /app
 
-RUN microdnf install wget unzip
+RUN microdnf install wget unzip curl
+
 # note: this is the *tool* we use to generate HGNC FHIR sets.. not the version of HGNC itself
 # the version of this will need to be manually updated as the tool evolves (see https://github.com/aehrc/fhir-hgnc)
-RUN wget --progress=bar:giga https://github.com/aehrc/fhir-hgnc/releases/download/v0.2.0/fhir-hgnc-0.2.0.jar -O fhir-hgnc.jar
+RUN curl -s -S -L https://github.com/aehrc/fhir-hgnc/releases/download/v0.2.0/fhir-hgnc-0.2.0.jar --output fhir-hgnc.jar
 
-RUN test ! -z "$HGNC_RELEASE" && wget --progress=bar:giga "http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/archive/quarterly/json/hgnc_complete_set_$HGNC_RELEASE.json" -O hgnc_complete_set.json || true
+RUN test ! -z "$HGNC_RELEASE" && curl -s -S -L -w '%{size_download} bytes took %{time_total}s\n' "http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/archive/quarterly/json/hgnc_complete_set_$HGNC_RELEASE.json" --output hgnc_complete_set.json || true
 RUN test ! -z "$HGNC_RELEASE" && java -jar fhir-hgnc.jar -igi hgnc_complete_set.json -ogi hgnc.json || true
 
 #
@@ -48,37 +49,64 @@ ARG MONDO_RELEASE=""
 
 WORKDIR /app
 
-RUN microdnf install wget unzip
-RUN wget --progress=bar:giga https://github.com/aehrc/fhir-owl/releases/download/v1.1/fhir-owl-v1.1.jar -O fhir-owl.jar
+RUN microdnf install wget unzip curl
+
+# RUN wget --progress=bar:giga https://github.com/aehrc/fhir-owl/releases/download/v1.1/fhir-owl-v1.1.jar -O fhir-owl.jar
+# ENV FHIROWLBIN fhir-owl.jar
+COPY fhir-owl-experimental.jar .
+ENV FHIROWLBIN fhir-owl-experimental.jar
 
 # start with all the downloads so that we won't need to re-download as we debug the rest of our builder
-RUN test ! -z "$HPO_RELEASE" && wget --progress=bar:giga "https://github.com/obophenotype/human-phenotype-ontology/archive/refs/tags/v$HPO_RELEASE.zip" -O hpo.zip || true
-RUN test ! -z "$HANCESTRO_RELEASE" && wget --progress=bar:giga "https://github.com/EBISPOT/ancestro/archive/refs/tags/$HANCESTRO_RELEASE.zip" -O hancestro.zip || true
-RUN test ! -z "$MONDO_RELEASE" && wget --progress=bar:giga "https://github.com/monarch-initiative/mondo/releases/download/v$MONDO_RELEASE/mondo.owl" -O mondo.owl || true
+# github downloads involve a 302 redirect so we need to use -L.. added -s -S as we don't want progress meter, only errors
+RUN test ! -z "$HPO_RELEASE" && curl -s -S -L -w '%{size_download} bytes took %{time_total}s\n' "https://github.com/obophenotype/human-phenotype-ontology/archive/refs/tags/v$HPO_RELEASE.zip" --output hpo.zip || true
+RUN test ! -z "$HANCESTRO_RELEASE" && curl -s -S -L -w '%{size_download} bytes took %{time_total}s\n' "https://github.com/EBISPOT/ancestro/archive/refs/tags/$HANCESTRO_RELEASE.zip" --output hancestro.zip || true
+RUN test ! -z "$MONDO_RELEASE" && curl -s -S -L -w '%{size_download} bytes took %{time_total}s\n' "https://github.com/monarch-initiative/mondo/releases/download/v$MONDO_RELEASE/mondo.owl" --output mondo.owl || true
+
+# For canonical definitions of properties (in a FHIR world) - see https://confluence.hl7.org/display/TA/Human+Phenotype+Ontology
 
 # convert the OWL files into FHIR JSON codesystem bundles
-RUN test ! -z "$HPO_RELEASE" && unzip -j hpo.zip "*/hp.owl" || true
-RUN test ! -z "$HPO_RELEASE" && java -jar fhir-owl.jar -i hp.owl -v "$HPO_RELEASE" -o hp.json \
-                -id hpo -name "Human Phenotype Ontology" -content not-present \
-                -mainNs http://purl.obolibrary.org/obo/HP_ \
-                -descriptionProp http://purl.org/dc/elements/1.1/subject \
-                -status active -codeReplace "_,:" || true
+RUN test ! -z "$HPO_RELEASE" && unzip -j hpo.zip "*/hp-full.owl" || true
+RUN test ! -z "$HPO_RELEASE" && java -Xmx4G -jar $FHIROWLBIN -i hp-full.owl -o hp.json \
+                -id hpo \
+                -name "HumanPhenotypeOntology" \
+                -t "Human Phenotype Ontology" \
+                -url "http://human-phenotype-ontology.org" \
+                -content complete \
+                -mainNs 'http://purl.obolibrary.org/obo/HP_' \
+                -dateRegex "(?<year>\\d{4})-(?<month>\\d{2})-(?<day>\\d{2})" \
+                -definition 'http://purl.obolibrary.org/obo/IAO_0000115' \
+                -comment 'http://www.w3.org/2000/01/rdf-schema#comment' \
+                -s 'http://www.geneontology.org/formats/oboInOwl#hasExactSynonym' \
+                -status active \
+                -codeReplace "_,:" || true
 
 RUN test ! -z "$HANCESTRO_RELEASE" && unzip -j hancestro.zip "*/hancestro.owl" || true
-RUN test ! -z "$HANCESTRO_RELEASE" && java -jar fhir-owl.jar -i hancestro.owl -v "$HANCESTRO_RELEASE" -o hancestro.json \
-                -id hancestro -name "Human Ancestry Ontology" \
-                -mainNs http://purl.obolibrary.org/obo/HANCESTRO_ \
-                -status active -codeReplace "_,:" || true
+RUN test ! -z "$HANCESTRO_RELEASE" && java -Xmx4G -jar $FHIROWLBIN -i hancestro.owl -v "$HANCESTRO_RELEASE" -o hancestro.json \
+                -id hancestro \
+                -name "HumanAncestryOntology" \
+                -t "Human Ancestry Ontology" \
+                -mainNs 'http://purl.obolibrary.org/obo/HANCESTRO_' \
+                -definition 'http://purl.obolibrary.org/obo/IAO_0000115' \
+                -comment 'http://www.w3.org/2000/01/rdf-schema#comment' \
+                -s 'http://www.geneontology.org/formats/oboInOwl#hasExactSynonym' \
+                -status active \
+                -codeReplace "_,:" || true
 
-RUN test ! -z "$MONDO_RELEASE" && java -Xmx1024m -jar fhir-owl.jar -i mondo.owl -v "$MONDO_RELEASE" -o mondo.json \
-                -id mondo -name "MONDO: Monarch Disease Ontology" \
-                -mainNs http://purl.obolibrary.org/obo/MONDO_ \
-                -status active -codeReplace "_,:" || true
+RUN test ! -z "$MONDO_RELEASE" && java -Xmx4G -jar $FHIROWLBIN -i mondo.owl -v "$MONDO_RELEASE" -o mondo.json \
+                -id mondo \
+                -name "MonarchDiseaseOntology" \
+                -t "Monarch Disease Ontology" \
+                -mainNs 'http://purl.obolibrary.org/obo/MONDO_' \
+                -definition 'http://purl.obolibrary.org/obo/IAO_0000115' \
+                -comment 'http://www.w3.org/2000/01/rdf-schema#comment' \
+                -s 'http://www.geneontology.org/formats/oboInOwl#hasExactSynonym' \
+                -status active \
+                -codeReplace "_,:" || true
 
 #
 # Ontoserver
 #
-FROM quay.io/aehrc/ontoserver:ctsa-6.8.0
+FROM quay.io/aehrc/ontoserver:ctsa-6.11.1
 
 ARG NCTS_CLIENT_ID=""
 ARG NCTS_CLIENT_SECRET=""

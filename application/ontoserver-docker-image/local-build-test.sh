@@ -9,11 +9,12 @@ echo "Using NCTS $NCTS_ID with secret $NCTS_SECRET"
 
 docker build . --progress plain \
          --build-arg HGNC_RELEASE=2021-10-01 \
-         --build-arg HPO_RELEASE=2021-10-10 \
          --build-arg HANCESTRO_RELEASE=2.5 \
          --build-arg MONDO_RELEASE=2021-12-01 \
-         --build-arg NCTS_CLIENT_ID=$NCTS_ID \
-         --build-arg NCTS_CLIENT_SECRET=$NCTS_SECRET \
-         --build-arg SNOMED_RELEASE=20210930 \
+         --build-arg HPO_RELEASE=2022-10-05 \
          -t onto
 
+#         --build-arg NCTS_CLIENT_ID=$NCTS_ID \
+#         --build-arg NCTS_CLIENT_SECRET=$NCTS_SECRET \
+#         --build-arg SNOMED_RELEASE=20210930 \
+#

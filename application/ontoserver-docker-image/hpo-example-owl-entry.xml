@@ -1,0 +1,39 @@
+Some example HPO codes to help out with identifying correct synoynm/definition properties
+
+<owl:Class rdf:about="http://purl.obolibrary.org/obo/HP_0000169">
+    <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/HP_0000168"/>
+    <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/HP_0010614"/>
+    <obo:IAO_0000115 rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The presence of fibrosis of the gingiva.</obo:IAO_0000115>
+    <oboInOwl:hasDbXref rdf:datatype="http://www.w3.org/2001/XMLSchema#string">MSH:C562884</oboInOwl:hasDbXref>
+    <oboInOwl:hasDbXref rdf:datatype="http://www.w3.org/2001/XMLSchema#string">MSH:D005351</oboInOwl:hasDbXref>
+    <oboInOwl:hasDbXref>NCIT:C3041</oboInOwl:hasDbXref>
+    <oboInOwl:hasDbXref rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SNOMEDCT_US:109620006</oboInOwl:hasDbXref>
+    <oboInOwl:hasDbXref rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SNOMEDCT_US:58569000</oboInOwl:hasDbXref>
+    <oboInOwl:hasDbXref rdf:datatype="http://www.w3.org/2001/XMLSchema#string">UMLS:C0016049</oboInOwl:hasDbXref>
+    <oboInOwl:hasDbXref rdf:datatype="http://www.w3.org/2001/XMLSchema#string">UMLS:C0399440</oboInOwl:hasDbXref>
+    <oboInOwl:hasDbXref rdf:datatype="http://www.w3.org/2001/XMLSchema#string">UMLS:C4280677</oboInOwl:hasDbXref>
+    <oboInOwl:hasExactSynonym rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Gingival fibroma</oboInOwl:hasExactSynonym>
+    <oboInOwl:hasExactSynonym rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Gingival fibrous nodules</oboInOwl:hasExactSynonym>
+    <oboInOwl:hasNarrowSynonym>Hereditary gingival fibromatosis</oboInOwl:hasNarrowSynonym>
+    <oboInOwl:hasNarrowSynonym>Idiopathic gingival hyperplasia</oboInOwl:hasNarrowSynonym>
+    <oboInOwl:hasOBONamespace rdf:datatype="http://www.w3.org/2001/XMLSchema#string">human_phenotype</oboInOwl:hasOBONamespace>
+    <oboInOwl:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">HP:0000169</oboInOwl:id>
+    <oboInOwl:inSubset rdf:resource="http://purl.obolibrary.org/obo/hp#hposlim_core"/>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Gingival fibromatosis is characterized by a slowly progressive benign enlargement of the oral gingival tissues. Both genetic and pharmacologically induced forms of gingival fibromatosis are known. The most common genetic form, hereditary gingival fibromatosis (HGF), is usually transmitted as an autosomal dominant trait, although sporadic cases are common and autosomal recessive inheritance has been reported.</rdfs:comment>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Gingival fibromatosis</rdfs:label>
+</owl:Class>
+
+<owl:Class rdf:about="http://purl.obolibrary.org/obo/HP_0004439">
+    <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/HP_0000271"/>
+    <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/HP_0000929"/>
+    <obo:IAO_0000115 rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A characteristic appearance resulting from defective ossification of craniofacial bones.</obo:IAO_0000115>
+    <oboInOwl:created_by rdf:datatype="http://www.w3.org/2001/XMLSchema#string">peter</oboInOwl:created_by>
+    <oboInOwl:creation_date rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2008-03-18T09:58:00Z</oboInOwl:creation_date>
+    <oboInOwl:hasDbXref rdf:datatype="http://www.w3.org/2001/XMLSchema#string">MSH:D003394</oboInOwl:hasDbXref>
+    <oboInOwl:hasDbXref rdf:datatype="http://www.w3.org/2001/XMLSchema#string">SNOMEDCT_US:28861008</oboInOwl:hasDbXref>
+    <oboInOwl:hasDbXref rdf:datatype="http://www.w3.org/2001/XMLSchema#string">UMLS:C0010273</oboInOwl:hasDbXref>
+    <oboInOwl:hasExactSynonym>Crouzon syndrome</oboInOwl:hasExactSynonym>
+    <oboInOwl:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">HP:0004439</oboInOwl:id>
+    <rdfs:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Note: This term is used in the medical literature to describe an appearance of the face of patients with Crouzon syndrome (also called craniofacial dysostosis), which is characterized by acrocephaly, exophthalmos, hypertelorism, strabismus, parrot-beaked nose, and hypoplastic maxilla. This is thus probably mainly used as a bundled term and should be replaced by better descriptions in the future.</rdfs:comment>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Craniofacial dysostosis</rdfs:label>
+</owl:Class>
