@@ -129,7 +129,7 @@ USER root
 ENV authentication.oauth.endpoint.client_id.0 $NCTS_CLIENT_ID
 ENV authentication.oauth.endpoint.client_secret.0 $NCTS_CLIENT_SECRET
 ENV ONTOSERVER_INSECURE 'true'
-ENV JAVA_OPTS '-Xmx8G'
+ENV JAVA_OPTS '-XshowSettings:vm -XX:InitialRAMPercentage=75 -XX:MaxRAMPercentage=75 -XX:MinRAMPercentage=75'
 
 RUN echo Settings are HGNC $HGNC_RELEASE, HPO $HPO_RELEASE, SNOMED $SNOMED_RELEASE, HANCESTRO $HANCESTRO_RELEASE, MONDO $MONDO_RELEASE
 

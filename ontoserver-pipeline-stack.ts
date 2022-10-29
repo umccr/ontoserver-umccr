@@ -121,7 +121,7 @@ export class OntoserverPipelineStack extends Stack {
       hostNamePrefix: HOST_PREFIX,
       ontologies: ontologies,
       desiredCount: 1,
-      memoryLimitMiB: 2048,
+      memoryLimitMiB: 6144,
     });
 
     const prodStage = new OntoserverBuildStage(this, "Prod", {
@@ -131,7 +131,7 @@ export class OntoserverPipelineStack extends Stack {
       },
       hostNamePrefix: HOST_PREFIX,
       ontologies: ontologies,
-      desiredCount: 2,
+      desiredCount: 1,
       memoryLimitMiB: 4096,
     });
 

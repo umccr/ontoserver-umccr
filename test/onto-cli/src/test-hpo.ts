@@ -1,6 +1,6 @@
 import { assertDisplayValue } from "./test-common";
 
-const HPO_NS = "http://purl.obolibrary.org/obo/hp.owl";
+const HPO_NS = "http://human-phenotype-ontology.org";
 
 export async function testHpo(cs: any, client: any) {
   const gaitAtaxiaLookup = await client.request(
