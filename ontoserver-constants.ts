@@ -16,11 +16,11 @@ export const STACK_DESCRIPTION =
 // Mondo  https://github.com/monarch-initiative/mondo/releases
 // SNOMED  see NCTS
 export const CURRENT_ONTOLOGIES: { [n: string]: string } = {
-  HGNC_RELEASE: "2022-04-01",
-  HPO_RELEASE: "2022-06-11",
+  HGNC_RELEASE: "2022-10-01",
+  HPO_RELEASE: "2022-10-05",
   HANCESTRO_RELEASE: "2.6",
-  MONDO_RELEASE: "2022-06-01",
-  SNOMED_RELEASE: "20220531",
+  MONDO_RELEASE: "2022-10-11",
+  SNOMED_RELEASE: "20221031",
 };
 
 export const HOST_PREFIX = "onto";

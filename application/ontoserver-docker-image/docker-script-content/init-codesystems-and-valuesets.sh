@@ -23,6 +23,9 @@ then
   # This file (index.sh) only exists in the base docker image provided as part of Ontoserver
   # We want the calling Docker to be able to fail so we need to print the result output
   /index.sh -v "${SNOMED_RELEASE}"
+
+  # Let the database recover a bit from the SNOMED load
+  sleep 60
 fi
 
 putValueSet pieriandx-disease "${TO_LOAD_LOCATION}/disease.json"
@@ -49,5 +52,9 @@ if [ -n "$MONDO_RELEASE" ]
 then
   putCodeSystem mondo "${TO_LOAD_LOCATION}/mondo.json"
 fi
+
+curl -sS --fail "http://localhost:8080/api/jobs" | jq .
+
+curl --request POST --url 'http://localhost:8080/api/vacuum?cleanup=true' --header 'Content-Type: application/json'
 
 . "${SCRIPT_LOCATION}/stop-services-during-build.sh"

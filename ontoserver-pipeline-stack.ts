@@ -132,7 +132,7 @@ export class OntoserverPipelineStack extends Stack {
       hostNamePrefix: HOST_PREFIX,
       ontologies: ontologies,
       desiredCount: 1,
-      memoryLimitMiB: 4096,
+      memoryLimitMiB: 6144,
     });
 
     pipeline.addStage(devStage, {

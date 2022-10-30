@@ -1,4 +1,4 @@
-curl -s --location --request POST 'http://localhost:8080/fhir/ValueSet/$expand' \
+curl -sS --location --request POST 'http://localhost:8080/fhir/ValueSet/$expand' \
 --header 'Content-Type: application/fhir+json' \
 --data-raw '{
         "resourceType": "Parameters",
