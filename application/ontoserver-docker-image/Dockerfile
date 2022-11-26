@@ -65,8 +65,8 @@ RUN test ! -z "$MONDO_RELEASE" && curl -s -S -L -w '%{size_download} bytes took 
 # For canonical definitions of properties (in a FHIR world) - see https://confluence.hl7.org/display/TA/Human+Phenotype+Ontology
 
 # convert the OWL files into FHIR JSON codesystem bundles
-RUN test ! -z "$HPO_RELEASE" && unzip -j hpo.zip "*/hp-full.owl" || true
-RUN test ! -z "$HPO_RELEASE" && java -Xmx4G -jar $FHIROWLBIN -i hp-full.owl -o hp.json \
+RUN test ! -z "$HPO_RELEASE" && unzip -j hpo.zip "*/hp.owl" || true
+RUN test ! -z "$HPO_RELEASE" && java -Xmx4G -jar $FHIROWLBIN -i hp.owl -o hp.json \
                 -id hpo \
                 -name "HumanPhenotypeOntology" \
                 -t "Human Phenotype Ontology" \
@@ -106,7 +106,7 @@ RUN test ! -z "$MONDO_RELEASE" && java -Xmx4G -jar $FHIROWLBIN -i mondo.owl -v "
 #
 # Ontoserver
 #
-FROM quay.io/aehrc/ontoserver:ctsa-6.11.1
+FROM quay.io/aehrc/ontoserver:ctsa-6.12.1
 
 ARG NCTS_CLIENT_ID=""
 ARG NCTS_CLIENT_SECRET=""
